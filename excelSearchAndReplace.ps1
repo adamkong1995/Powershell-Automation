@@ -3,7 +3,7 @@ $sw = [Diagnostics.Stopwatch]::StartNew()
 Function SetupExcel(){ 
     $excelApp = New-Object -ComObject Excel.Application
 
-    $excelApp.visible = $False
+    $excelApp.visible = $clear
     $excelApp.displayalerts = $false
     $excelApp.EnableEvents = $False
     $excelApp.ScreenUpdating = $False
@@ -11,10 +11,28 @@ Function SetupExcel(){
     return $excelApp
 }
 
-$folderPath = "FolderOfExcels"
-$find = "StringToReplace"
-$replace = "ReplaceWith"
+$folderPath = Read-Host -prompt "Input the folder path of excel files, eg: 'O:\Adam\Active Record Testing\'" 
+$worksheetName = Read-Host -prompt "Input which worksheet in the workbook to find and replace, eg: 'Data*'" 
+$find = Read-Host -prompt "Input the text to find and replace"
+$replace = Read-Host -prompt "Input the new text to replace the original text"
 
+$isRun = Read-Host -prompt "
+Folder path of the excel files:      $folderPath
+Worksheet to find and replace:       $worksheetName
+Text to find:                        $find
+Text to replace with:                $replace
+Please check if the above information is correct (Y/N)"
+
+if($isRun -ne "Y" -and $isRun -ne "N"){
+    Write-host "Please input correctly (Y/N) to run the program"
+    Exit
+}
+if($isRun -eq "N"){
+    write-host "terminated"
+    Exit
+}
+
+Write-host "Program start"
 $fileNameList = (dir $folderPath).Name
 $excelApp =  SetupExcel
 
@@ -25,12 +43,11 @@ Foreach($fileName in $fileNameList){
     write-host $workbook.name
 
     Foreach($worksheet in $workbook.worksheets){
-        if($worksheet.name -like "WorksheetName"){
-        write-host $worksheet.name
-        
-        $Range = $worksheet.range("A1:AZ500")
-        $Search = $Range.find($find)
-            
+        if($worksheet.name -like $worksheetName){
+            write-host $worksheet.name
+            $Range = $worksheet.range("A1:AZ500")
+            $Search = $Range.find($find)
+
             if ($search -ne $null) {
                 $firstSearchRow = $search.Row
                 $firstSearchcolumn = $search.column
